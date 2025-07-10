@@ -1,8 +1,8 @@
-# Phase 1: Foundation Setup - Enterprise Playwright TypeScript Framework
+# Phase 1: Foundation Setup - PlaywrightX 
 
 ## Overview
 
-This phase establishes the fundamental architecture for a production-ready Playwright testing framework using TypeScript. We're building a solid foundation that supports enterprise requirements including type safety, scalability, and maintainability.
+This phase lays the groundwork for a robust, production-grade Playwright automation framework built with TypeScript. The goal is to create a solid foundation that meets the demands of teams — delivering type safety, scalability, and maintainability. Whether you're working in a fast-moving startup or a large enterprise, this setup is designed to support reliable, efficient test automation at any scale.
 
 ## Project Initialization
 
@@ -18,7 +18,7 @@ pnpm init
 
 # Create the essential directory structure
 mkdir -p src/{core,config,fixtures,pages,components,api,utils,reporters,setup}
-mkdir -p tests
+mkdir -p tests/{e2e,api,visual,performance,accessibility}
 mkdir -p scripts docs reports/screenshots config/environments
 ```
 
@@ -115,7 +115,7 @@ Create `tsconfig.json`:
 
 ### Step 4: Playwright Configuration
 
-Create `playwright.config.ts`:
+Create/update `playwright.config.ts`:
 
 ```typescript
 import { defineConfig, devices } from '@playwright/test';
@@ -148,14 +148,14 @@ export default defineConfig({
   reporter: [
     ['list'],                             // Simple list output
     ['html', { 
-      outputFolder: 'reports/html',
+      outputFolder: `reports/${process.env.RUN_ID || 'latest'}/html`,
       open: 'never'                       // Don't auto-open report
     }],
     ['json', { 
-      outputFile: 'reports/json/results.json' 
+      outputFile: `reports/${process.env.RUN_ID || 'latest'}/json/results.json` 
     }],
     ['junit', { 
-      outputFile: 'reports/junit/results.xml' 
+      outputFile: `reports/${process.env.RUN_ID || 'latest'}/junit/results.xml` 
     }]
   ],
   
@@ -182,7 +182,7 @@ export default defineConfig({
   },
   
   // Output directory for test artifacts
-  outputDir: 'reports/test-results',
+  outputDir: `reports/${process.env.RUN_ID || 'latest'}/test-results`,
   
   // Global setup and teardown
   globalSetup: require.resolve('./src/setup/global-setup.ts'),
@@ -261,23 +261,40 @@ Create `.eslintrc.json`:
     "@typescript-eslint/no-unused-vars": ["error", {
       "argsIgnorePattern": "^_"
     }],
+    "@typescript-eslint/prefer-nullish-coalescing": "error",
+    "@typescript-eslint/prefer-optional-chain": "error",
+    "@typescript-eslint/no-floating-promises": "error",
     
     // Playwright specific rules
     "playwright/no-wait-for-timeout": "warn",
     "playwright/no-skip-test": "warn",
+    "playwright/expect-expect": "error",
+    "playwright/no-conditional-in-test": "warn",
+    "playwright/no-nth-methods": "warn",
+    "playwright/prefer-web-first-assertions": "error",
+    "playwright/prefer-to-have-length": "error",
     
     // General rules
     "no-console": ["warn", { 
       "allow": ["warn", "error", "info"] 
     }],
     "prefer-const": "error",
-    "no-var": "error"
+    "no-var": "error",
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"]
   },
   "overrides": [
     {
       "files": ["*.test.ts", "*.spec.ts"],
       "rules": {
-        "@typescript-eslint/no-non-null-assertion": "off"
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/explicit-function-return-type": "off"
+      }
+    },
+    {
+      "files": ["playwright.config.ts", "global-setup.ts", "global-teardown.ts"],
+      "rules": {
+        "no-console": "off"
       }
     }
   ]
@@ -291,15 +308,16 @@ Create `.prettierrc.json`:
 ```json
 {
   "semi": true,
-  "trailingComma": "es5",
+  "trailingComma": "all",
   "singleQuote": true,
-  "printWidth": 100,
+  "printWidth": 120,
   "tabWidth": 2,
   "useTabs": false,
   "arrowParens": "avoid",
   "endOfLine": "lf",
   "bracketSpacing": true,
-  "bracketSameLine": false
+  "bracketSameLine": false,
+  "quoteProps": "as-needed"
 }
 ```
 
@@ -355,30 +373,36 @@ async function globalSetup(config: FullConfig): Promise<void> {
   const envFile = process.env.ENV_FILE || '.env';
   dotenv.config({ path: path.resolve(process.cwd(), envFile) });
   
-  console.log('🚀 Global setup started');
-  console.log(`📁 Environment: ${process.env.TEST_ENVIRONMENT || 'local'}`);
-  console.log(`🌐 Base URL: ${process.env.BASE_URL}`);
-  console.log(`👥 Client: ${process.env.CLIENT_NAME || 'default'}`);
+  console.log('**** Global setup started ****');
+  console.log(`Environment: ${process.env.TEST_ENVIRONMENT || 'local'}`);
+  console.log(`Base URL: ${process.env.BASE_URL}`);
+  console.log(`Client: ${process.env.CLIENT_NAME || 'default'}`);
   
   // Set up any global state needed
   // For example: authenticate and save storage state
   
-  // Create necessary directories
+  // Create unique run folder
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const runId = `run-${timestamp}`;
+  process.env.RUN_ID = runId;
+  
+  // Create necessary directories with unique run folder
   const fs = await import('fs/promises');
   const directories = [
-    'reports/screenshots',
-    'reports/videos',
-    'reports/traces',
-    'reports/html',
-    'reports/json',
-    'reports/junit'
+    `reports/${runId}/screenshots`,
+    `reports/${runId}/videos`,
+    `reports/${runId}/traces`,
+    `reports/${runId}/html`,
+    `reports/${runId}/json`,
+    `reports/${runId}/junit`,
+    `reports/${runId}/test-results`
   ];
   
   for (const dir of directories) {
     await fs.mkdir(dir, { recursive: true });
   }
   
-  console.log('✅ Global setup completed');
+  console.log(`**** Global setup completed - Run ID: ${runId} ****`);
 }
 
 export default globalSetup;
@@ -390,17 +414,17 @@ Create `src/setup/global-teardown.ts`:
 import { FullConfig } from '@playwright/test';
 
 async function globalTeardown(config: FullConfig): Promise<void> {
-  console.log('🧹 Global teardown started');
+  console.log('**** Global teardown started ****');
   
   // Clean up any global resources
   // For example: close database connections, clean test data
   
-  console.log('✅ Global teardown completed');
+  console.log('**** Global teardown completed ****');
   
   // Generate summary report if needed
   if (process.env.GENERATE_REPORT === 'true') {
-    console.log('📊 Generating test report...');
-    // Report generation logic will be added in later phases
+    console.log('**** Generating test report... ****');
+    // Report generation logic to be added in later phase
   }
 }
 
@@ -413,11 +437,10 @@ Update `package.json`:
 
 ```json
 {
-  "name": "playwright-enterprise-framework",
+  "name": "playwrightx",
   "version": "1.0.0",
-  "description": "Enterprise-grade Playwright testing framework with TypeScript",
-  "scripts": {
-    // Test execution scripts
+  "description": "Playwright testing framework with TypeScript",
+"scripts": {
     "test": "playwright test",
     "test:chrome": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
@@ -425,27 +448,19 @@ Update `package.json`:
     "test:mobile": "playwright test --project=mobile-chrome --project=mobile-safari",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    
-    // Test categories
     "test:e2e": "playwright test tests/e2e",
     "test:api": "playwright test tests/api",
     "test:visual": "playwright test tests/visual",
     "test:performance": "playwright test tests/performance",
-    
-    // Utilities
     "playwright:install": "playwright install --with-deps",
     "report:open": "playwright show-report reports/html",
     "trace:open": "playwright show-trace",
-    
-    // Code quality
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
     "typecheck": "tsc --noEmit",
-    
-    // Pre-commit hook
-    "pre-commit": "pnpm run typecheck && pnpm run lint && pnpm run format:check"
+    "precommit": "pnpm run typecheck && pnpm run lint && pnpm run format:check"
   },
   "keywords": [
     "playwright",
@@ -455,45 +470,76 @@ Update `package.json`:
     "typescript",
     "framework"
   ],
-  "author": "Your Team",
+  "author": "James Brett",
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "devDependencies": {
+    "@playwright/test": "^1.54.0",
+    "@types/node": "^24.0.13",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
+    "dotenv": "17.2.0",
+    "eslint": "9.30.1",
+    "eslint-config-prettier": "10.1.5",
+    "eslint-plugin-playwright": "2.2.0",
+    "prettier": "3.6.2",
+    "typescript": "5.8.3"
   }
 }
+
 ```
 
 ### Step 10: Initial Test File
 
-Create `tests/e2e/example.test.ts`:
+Create/Update `tests/e2e/example.test.ts`:
 
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test.describe('Framework Setup Validation', () => {
-  test('should load the application homepage', async ({ page }) => {
-    // Navigate to the base URL
-    await page.goto('/');
-    
-    // Verify the page loaded successfully
-    await expect(page).toHaveTitle(/.*/, { timeout: 5000 });
-    
-    // Take a screenshot for visual verification
-    await page.screenshot({ 
-      path: 'reports/screenshots/homepage.png',
-      fullPage: true 
-    });
+test('has title', async ({ page }) => {
+  await page.goto('https://playwright.dev/');
+
+  // Expect a title "to contain" a substring.
+  await expect(page).toHaveTitle(/Playwright/);
+
+  // Take a screenshot for visual verification
+  const screenshotPath = `reports/screenshots/homepage-${test.info().project.name}.png`;
+  await page.screenshot({ 
+    path: screenshotPath,
+    fullPage: true 
   });
   
-  test('should handle navigation', async ({ page }) => {
-    await page.goto('/');
-    
-    // Example: Click on a navigation link
-    // await page.click('text=About');
-    
-    // Verify URL changed
-    // await expect(page).toHaveURL(/.*about/);
+  // Attach screenshot to test report
+  await test.info().attach('Homepage Screenshot', {
+    path: screenshotPath,
+    contentType: 'image/png'
+  });
+
+});
+
+test('get started link', async ({ page }) => {
+  await page.goto('https://playwright.dev/');
+
+  // Click the get started link.
+  await page.getByRole('link', { name: 'Get started' }).click();
+
+  // Expects page to have a heading with the name of Installation.
+  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+
+    // Take a screenshot for visual verification
+  const screenshotPath = `reports/screenshots/get-started-${test.info().project.name}.png`;
+  await page.screenshot({ 
+    path: screenshotPath,
+    fullPage: true 
+  });
+  
+  // Attach screenshot to test report
+  await test.info().attach('Get Started Screenshot', {
+    path: screenshotPath,
+    contentType: 'image/png'
   });
 });
 ```

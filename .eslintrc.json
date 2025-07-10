@@ -1,0 +1,64 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "playwright"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:playwright/recommended",
+    "prettier"
+  ],
+  "rules": {
+    // TypeScript specific rules
+    "@typescript-eslint/explicit-function-return-type": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_"
+    }],
+    "@typescript-eslint/prefer-nullish-coalescing": "error",
+    "@typescript-eslint/prefer-optional-chain": "error",
+    "@typescript-eslint/no-floating-promises": "error",
+    
+    // Playwright specific rules
+    "playwright/no-wait-for-timeout": "warn",
+    "playwright/no-skip-test": "warn",
+    "playwright/expect-expect": "error",
+    "playwright/no-conditional-in-test": "warn",
+    "playwright/no-nth-methods": "warn",
+    "playwright/prefer-web-first-assertions": "error",
+    "playwright/prefer-to-have-length": "error",
+    
+    // General rules
+    "no-console": ["warn", { 
+      "allow": ["warn", "error", "info"] 
+    }],
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"]
+  },
+  "overrides": [
+    {
+      "files": ["*.test.ts", "*.spec.ts"],
+      "rules": {
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/explicit-function-return-type": "off"
+      }
+    },
+    {
+      "files": ["playwright.config.ts", "global-setup.ts", "global-teardown.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}

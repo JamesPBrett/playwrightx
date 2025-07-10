@@ -5,3 +5,9 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/playwright/.env
+/.env.local
+/.env.development
+/.env.test
+/.env.production
+/reports/
