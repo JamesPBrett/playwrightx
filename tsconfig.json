@@ -1,0 +1,58 @@
+{
+  "compilerOptions": {
+    // Language and Environment
+    "target": "ES2022",                      // Modern JavaScript features
+    "lib": ["ES2022", "DOM", "DOM.Iterable"], // Include DOM types for browser automation
+    "module": "ESNext",                      // Use ES modules
+    "moduleResolution": "bundler",           // Modern module resolution
+    
+    // Type Checking
+    "strict": true,                          // Enable all strict type checking
+    "noUnusedLocals": true,                 // Error on unused variables
+    "noUnusedParameters": true,              // Error on unused parameters
+    "noImplicitReturns": true,              // Ensure all code paths return
+    "noFallthroughCasesInSwitch": true,    // Prevent switch fallthrough bugs
+    "exactOptionalPropertyTypes": true,     // Stricter optional property handling
+    
+    // Modules
+    "resolveJsonModule": true,               // Import JSON files
+    "esModuleInterop": true,                // Better CommonJS interop
+    "allowSyntheticDefaultImports": true,    // Allow default imports
+    
+    // Emit
+    "noEmit": true,                         // Don't generate JS files
+    "skipLibCheck": true,                   // Skip type checking of dependencies
+    
+    // JavaScript Support
+    "allowJs": true,                        // Allow importing JS files
+    "checkJs": false,                       // Don't type-check JS files
+    
+    // Experimental
+    "experimentalDecorators": true,         // Enable decorators
+    "emitDecoratorMetadata": true,         // Emit decorator metadata
+    
+    // Path Mapping for cleaner imports
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@core/*": ["src/core/*"],
+      "@config/*": ["src/config/*"],
+      "@pages/*": ["src/pages/*"],
+      "@components/*": ["src/components/*"],
+      "@api/*": ["src/api/*"],
+      "@utils/*": ["src/utils/*"],
+      "@fixtures/*": ["src/fixtures/*"],
+      "@tests/*": ["tests/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "playwright.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "reports",
+    "dist"
+  ]
+}
