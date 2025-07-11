@@ -1,5 +1,5 @@
 {
-  "name": "playwrightx",
+  "name": "testwrightx",
   "version": "1.0.0",
   "description": "Playwright testing framework with TypeScript",
 "scripts": {

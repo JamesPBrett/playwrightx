@@ -1,4 +1,4 @@
-# Phase 1: Foundation Setup - PlaywrightX 
+# Phase 1: Foundation Setup - TestWrightX 
 
 ## Overview
 
@@ -10,8 +10,8 @@ This phase lays the groundwork for a robust, production-grade Playwright automat
 
 ```bash
 # Create the main project directory
-mkdir playwrightx
-cd playwrightx
+mkdir testwrightx
+cd testwrightx
 
 # Initialize package.json with pnpm (recommended for enterprise)
 pnpm init
@@ -442,7 +442,7 @@ Update `package.json`:
 
 ```json
 {
-  "name": "playwrightx",
+  "name": "testwrightx",
   "version": "1.0.0",
   "description": "Playwright testing framework with TypeScript",
 "scripts": {
