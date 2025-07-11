@@ -128,6 +128,14 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 // Determine if running in CI
 const isCI = !!process.env.CI;
 
+// Generate run ID for this test run (only if not already set)
+const runId = process.env.RUN_ID || (() => {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const id = `run-${timestamp}`;
+  process.env.RUN_ID = id;
+  return id;
+})();
+
 export default defineConfig({
   // Test directory
   testDir: './tests',
@@ -136,7 +144,7 @@ export default defineConfig({
   fullyParallel: true,                    // Run tests in parallel
   forbidOnly: isCI,                       // Fail if test.only is left in code
   retries: isCI ? 2 : 0,                 // Retry failed tests in CI
-  ...(isCI && { workers: 4 }),           // Number of parallel workers in CI
+  workers: isCI ? 4 : 2,                 // Number of parallel workers
   
   // Test timeout settings
   timeout: 30000,                         // 30 seconds per test
@@ -148,14 +156,14 @@ export default defineConfig({
   reporter: [
     ['list'],                             // Simple list output
     ['html', { 
-      outputFolder: `reports/${process.env.RUN_ID || 'latest'}/html`,
+      outputFolder: `reports/${runId}/html`,
       open: 'never'                       // Don't auto-open report
     }],
     ['json', { 
-      outputFile: `reports/${process.env.RUN_ID || 'latest'}/json/results.json` 
+      outputFile: `reports/${runId}/json/results.json` 
     }],
     ['junit', { 
-      outputFile: `reports/${process.env.RUN_ID || 'latest'}/junit/results.xml` 
+      outputFile: `reports/${runId}/junit/results.xml` 
     }]
   ],
   
@@ -182,7 +190,7 @@ export default defineConfig({
   },
   
   // Output directory for test artifacts
-  outputDir: `reports/${process.env.RUN_ID || 'latest'}/test-results`,
+  outputDir: `reports/${runId}/test-results`,
   
   // Global setup and teardown
   globalSetup: require.resolve('./src/setup/global-setup.ts'),
@@ -389,9 +397,6 @@ async function globalSetup(config: FullConfig): Promise<void> {
   // Create necessary directories with unique run folder
   const fs = await import('fs/promises');
   const directories = [
-    `reports/${runId}/screenshots`,
-    `reports/${runId}/videos`,
-    `reports/${runId}/traces`,
     `reports/${runId}/html`,
     `reports/${runId}/json`,
     `reports/${runId}/junit`,
@@ -453,8 +458,8 @@ Update `package.json`:
     "test:visual": "playwright test tests/visual",
     "test:performance": "playwright test tests/performance",
     "playwright:install": "playwright install --with-deps",
-    "report:open": "playwright show-report reports/html",
-    "trace:open": "playwright show-trace",
+    "report:open": "playwright show-report reports/latest/html",
+    "trace:open": "playwright show-trace reports/latest/test-results/trace.zip",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
@@ -506,7 +511,7 @@ test('has title', async ({ page }) => {
   await expect(page).toHaveTitle(/Playwright/);
 
   // Take a screenshot for visual verification
-  const screenshotPath = `reports/screenshots/homepage-${test.info().project.name}.png`;
+  const screenshotPath = `reports/${process.env.RUN_ID}/screenshots/homepage-${test.info().project.name}.png`;
   await page.screenshot({ 
     path: screenshotPath,
     fullPage: true 
@@ -530,7 +535,7 @@ test('get started link', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
 
     // Take a screenshot for visual verification
-  const screenshotPath = `reports/screenshots/get-started-${test.info().project.name}.png`;
+  const screenshotPath = `reports/${process.env.RUN_ID}/screenshots/get-started-${test.info().project.name}.png`;
   await page.screenshot({ 
     path: screenshotPath,
     fullPage: true 
@@ -585,9 +590,10 @@ pnpm test:debug
 pnpm run report:open
 
 # Reports are available in:
-# - reports/html/index.html (HTML report)
-# - reports/json/results.json (JSON results)
-# - reports/junit/results.xml (JUnit XML)
+# - reports/${runId}/html/index.html (HTML report)
+# - reports/${runId}/json/results.json (JSON results)
+# - reports/${runId}/junit/results.xml (JUnit XML)
+# - reports/${runId}/test-results/ (traces, videos, screenshots)
 ```
 
 ## Value Delivered in Phase 1
