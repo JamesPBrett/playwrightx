@@ -408,6 +408,30 @@ test.describe('Routing', () => {
   });
 });
 
+test.describe('Failing Tests', () => {
+  test('should fail - wrong todo count assertion', async ({ page }) => {
+    // create a new todo locator
+    const newTodo = page.getByPlaceholder('What needs to be done?');
+    
+    await newTodo.fill(TODO_ITEMS[0]);
+    await newTodo.press('Enter');
+
+    // This will fail - expecting wrong count
+    await expect(page.getByTestId('todo-item')).toHaveCount(5);
+  });
+
+  test('should fail - incorrect text assertion', async ({ page }) => {
+    await createDefaultTodos(page);
+    
+    // This will fail - expecting wrong text
+    await expect(page.getByTestId('todo-title')).toHaveText([
+      'wrong item 1',
+      'wrong item 2', 
+      'wrong item 3'
+    ]);
+  });
+});
+
 async function createDefaultTodos(page: Page) {
   // create a new todo locator
   const newTodo = page.getByPlaceholder('What needs to be done?');
