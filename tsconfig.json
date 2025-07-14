@@ -35,14 +35,18 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@core/*": ["src/core/*"],
-      "@config/*": ["src/config/*"],
-      "@pages/*": ["src/pages/*"],
-      "@components/*": ["src/components/*"],
       "@api/*": ["src/api/*"],
-      "@utils/*": ["src/utils/*"],
+      "@auth/*": ["src/auth/*"],
+      "@auth/methods/*": ["src/auth/methods/*"],
+      "@auth/personas/*": ["src/auth/personas/*"],
+      "@auth/session/*": ["src/auth/session/*"],
+      "@components/*": ["src/components/*"],
+      "@config/*": ["src/config/*"],
+      "@core/*": ["src/core/*"],
       "@fixtures/*": ["src/fixtures/*"],
-      "@tests/*": ["tests/*"]
+      "@pages/*": ["src/pages/*"],
+      "@tests/*": ["tests/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": [
