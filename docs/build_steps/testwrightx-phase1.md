@@ -1,4 +1,4 @@
-# Phase 1: Foundation Setup - TestWrightX 
+# Phase 1: Foundation Setup - TestWrightX
 
 ## Overview
 
@@ -56,36 +56,36 @@ Create `tsconfig.json`:
 {
   "compilerOptions": {
     // Language and Environment
-    "target": "ES2022",                      // Modern JavaScript features
+    "target": "ES2022", // Modern JavaScript features
     "lib": ["ES2022", "DOM", "DOM.Iterable"], // Include DOM types for browser automation
-    "module": "ESNext",                      // Use ES modules
-    "moduleResolution": "bundler",           // Modern module resolution
-    
+    "module": "ESNext", // Use ES modules
+    "moduleResolution": "bundler", // Modern module resolution
+
     // Type Checking
-    "strict": true,                          // Enable all strict type checking
-    "noUnusedLocals": true,                 // Error on unused variables
-    "noUnusedParameters": true,              // Error on unused parameters
-    "noImplicitReturns": true,              // Ensure all code paths return
-    "noFallthroughCasesInSwitch": true,    // Prevent switch fallthrough bugs
-    "exactOptionalPropertyTypes": true,     // Stricter optional property handling
-    
+    "strict": true, // Enable all strict type checking
+    "noUnusedLocals": true, // Error on unused variables
+    "noUnusedParameters": true, // Error on unused parameters
+    "noImplicitReturns": true, // Ensure all code paths return
+    "noFallthroughCasesInSwitch": true, // Prevent switch fallthrough bugs
+    "exactOptionalPropertyTypes": true, // Stricter optional property handling
+
     // Modules
-    "resolveJsonModule": true,               // Import JSON files
-    "esModuleInterop": true,                // Better CommonJS interop
-    "allowSyntheticDefaultImports": true,    // Allow default imports
-    
+    "resolveJsonModule": true, // Import JSON files
+    "esModuleInterop": true, // Better CommonJS interop
+    "allowSyntheticDefaultImports": true, // Allow default imports
+
     // Emit
-    "noEmit": true,                         // Don't generate JS files
-    "skipLibCheck": true,                   // Skip type checking of dependencies
-    
+    "noEmit": true, // Don't generate JS files
+    "skipLibCheck": true, // Skip type checking of dependencies
+
     // JavaScript Support
-    "allowJs": true,                        // Allow importing JS files
-    "checkJs": false,                       // Don't type-check JS files
-    
+    "allowJs": true, // Allow importing JS files
+    "checkJs": false, // Don't type-check JS files
+
     // Experimental
-    "experimentalDecorators": true,         // Enable decorators
-    "emitDecoratorMetadata": true,         // Emit decorator metadata
-    
+    "experimentalDecorators": true, // Enable decorators
+    "emitDecoratorMetadata": true, // Emit decorator metadata
+
     // Path Mapping for cleaner imports
     "baseUrl": ".",
     "paths": {
@@ -100,16 +100,8 @@ Create `tsconfig.json`:
       "@tests/*": ["tests/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*",
-    "playwright.config.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "reports",
-    "dist"
-  ]
+  "include": ["src/**/*", "tests/**/*", "playwright.config.ts"],
+  "exclude": ["node_modules", "reports", "dist"]
 }
 ```
 
@@ -129,112 +121,123 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 const isCI = !!process.env.CI;
 
 // Generate run ID for this test run (only if not already set)
-const runId = process.env.RUN_ID || (() => {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const id = `run-${timestamp}`;
-  process.env.RUN_ID = id;
-  return id;
-})();
+const runId =
+  process.env.RUN_ID ||
+  (() => {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const id = `run-${timestamp}`;
+    process.env.RUN_ID = id;
+    return id;
+  })();
 
 export default defineConfig({
   // Test directory
   testDir: './tests',
-  
+
   // Test execution settings
-  fullyParallel: true,                    // Run tests in parallel
-  forbidOnly: isCI,                       // Fail if test.only is left in code
-  retries: isCI ? 2 : 0,                 // Retry failed tests in CI
-  workers: isCI ? 4 : 2,                 // Number of parallel workers
-  
+  fullyParallel: true, // Run tests in parallel
+  forbidOnly: isCI, // Fail if test.only is left in code
+  retries: isCI ? 2 : 0, // Retry failed tests in CI
+  workers: isCI ? 4 : 2, // Number of parallel workers
+
   // Test timeout settings
-  timeout: 30000,                         // 30 seconds per test
+  timeout: 30000, // 30 seconds per test
   expect: {
-    timeout: 10000                        // 10 seconds for assertions
+    timeout: 10000, // 10 seconds for assertions
   },
-  
+
   // Reporter configuration
   reporter: [
-    ['list'],                             // Simple list output
-    ['html', { 
-      outputFolder: `reports/${runId}/html`,
-      open: 'never'                       // Don't auto-open report
-    }],
-    ['json', { 
-      outputFile: `reports/${runId}/json/results.json` 
-    }],
-    ['junit', { 
-      outputFile: `reports/${runId}/junit/results.xml` 
-    }]
+    ['list'], // Simple list output
+    [
+      'html',
+      {
+        outputFolder: `reports/${runId}/html`,
+        open: 'never', // Don't auto-open report
+      },
+    ],
+    [
+      'json',
+      {
+        outputFile: `reports/${runId}/json/results.json`,
+      },
+    ],
+    [
+      'junit',
+      {
+        outputFile: `reports/${runId}/junit/results.xml`,
+      },
+    ],
   ],
-  
+
   // Shared settings for all projects
   use: {
     // Base URL for navigation
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
-    
+
     // Artifacts
-    trace: 'on-first-retry',              // Collect trace on retry
-    screenshot: 'only-on-failure',        // Screenshot on failure
-    video: 'retain-on-failure',           // Keep video on failure
-    
+    trace: 'on-first-retry', // Collect trace on retry
+    screenshot: 'only-on-failure', // Screenshot on failure
+    video: 'retain-on-failure', // Keep video on failure
+
     // Timeouts
-    actionTimeout: 15000,                 // 15 seconds for actions
-    navigationTimeout: 30000,             // 30 seconds for navigation
-    
+    actionTimeout: 15000, // 15 seconds for actions
+    navigationTimeout: 30000, // 30 seconds for navigation
+
     // Browser context options
     viewport: { width: 1920, height: 1080 },
     ignoreHTTPSErrors: true,
-    
+
     // Custom test id attribute
-    testIdAttribute: 'data-testid'
+    testIdAttribute: 'data-testid',
   },
-  
+
   // Output directory for test artifacts
   outputDir: `reports/${runId}/test-results`,
-  
+
   // Global setup and teardown
   globalSetup: require.resolve('./src/setup/global-setup.ts'),
   globalTeardown: require.resolve('./src/setup/global-teardown.ts'),
-  
+
   // Configure projects for different browsers
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Custom Chrome options
         launchOptions: {
-          args: ['--disable-dev-shm-usage']
-        }
-      }
+          args: ['--disable-dev-shm-usage'],
+        },
+      },
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] }
+      use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] }
+      use: { ...devices['Desktop Safari'] },
     },
     {
       name: 'mobile-chrome',
-      use: { ...devices['Pixel 5'] }
+      use: { ...devices['Pixel 5'] },
     },
     {
       name: 'mobile-safari',
-      use: { ...devices['iPhone 12'] }
-    }
+      use: { ...devices['iPhone 12'] },
+    },
   ],
-  
+
   // Web server configuration (conditionally included)
   ...(process.env.START_SERVER && {
     webServer: {
       command: 'npm run start',
       port: 3000,
       timeout: 120 * 1000,
-      reuseExistingServer: !isCI
-    }
-  })
+      reuseExistingServer: !isCI,
+    },
+  }),
 });
 ```
 
@@ -251,10 +254,7 @@ Create `.eslintrc.json`:
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "playwright"
-  ],
+  "plugins": ["@typescript-eslint", "playwright"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -266,13 +266,16 @@ Create `.eslintrc.json`:
     // TypeScript specific rules
     "@typescript-eslint/explicit-function-return-type": "error",
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unused-vars": ["error", {
-      "argsIgnorePattern": "^_"
-    }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "@typescript-eslint/prefer-nullish-coalescing": "error",
     "@typescript-eslint/prefer-optional-chain": "error",
     "@typescript-eslint/no-floating-promises": "error",
-    
+
     // Playwright specific rules
     "playwright/no-wait-for-timeout": "warn",
     "playwright/no-skip-test": "warn",
@@ -281,11 +284,14 @@ Create `.eslintrc.json`:
     "playwright/no-nth-methods": "warn",
     "playwright/prefer-web-first-assertions": "error",
     "playwright/prefer-to-have-length": "error",
-    
+
     // General rules
-    "no-console": ["warn", { 
-      "allow": ["warn", "error", "info"] 
-    }],
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error", "info"]
+      }
+    ],
     "prefer-const": "error",
     "no-var": "error",
     "eqeqeq": ["error", "always"],
@@ -380,33 +386,33 @@ async function globalSetup(config: FullConfig): Promise<void> {
   // Load environment variables
   const envFile = process.env.ENV_FILE || '.env';
   dotenv.config({ path: path.resolve(process.cwd(), envFile) });
-  
+
   console.log('**** Global setup started ****');
   console.log(`Environment: ${process.env.TEST_ENVIRONMENT || 'local'}`);
   console.log(`Base URL: ${process.env.BASE_URL}`);
   console.log(`Client: ${process.env.CLIENT_NAME || 'default'}`);
-  
+
   // Set up any global state needed
   // For example: authenticate and save storage state
-  
+
   // Create unique run folder
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const runId = `run-${timestamp}`;
   process.env.RUN_ID = runId;
-  
+
   // Create necessary directories with unique run folder
   const fs = await import('fs/promises');
   const directories = [
     `reports/${runId}/html`,
     `reports/${runId}/json`,
     `reports/${runId}/junit`,
-    `reports/${runId}/test-results`
+    `reports/${runId}/test-results`,
   ];
-  
+
   for (const dir of directories) {
     await fs.mkdir(dir, { recursive: true });
   }
-  
+
   console.log(`**** Global setup completed - Run ID: ${runId} ****`);
 }
 
@@ -420,12 +426,12 @@ import { FullConfig } from '@playwright/test';
 
 async function globalTeardown(config: FullConfig): Promise<void> {
   console.log('**** Global teardown started ****');
-  
+
   // Clean up any global resources
   // For example: close database connections, clean test data
-  
+
   console.log('**** Global teardown completed ****');
-  
+
   // Generate summary report if needed
   if (process.env.GENERATE_REPORT === 'true') {
     console.log('**** Generating test report... ****');
@@ -445,7 +451,7 @@ Update `package.json`:
   "name": "testwrightx",
   "version": "1.0.0",
   "description": "Playwright testing framework with TypeScript",
-"scripts": {
+  "scripts": {
     "test": "playwright test",
     "test:chrome": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
@@ -467,14 +473,7 @@ Update `package.json`:
     "typecheck": "tsc --noEmit",
     "precommit": "pnpm run typecheck && pnpm run lint && pnpm run format:check"
   },
-  "keywords": [
-    "playwright",
-    "automation",
-    "testing",
-    "e2e",
-    "typescript",
-    "framework"
-  ],
+  "keywords": ["playwright", "automation", "testing", "e2e", "typescript", "framework"],
   "author": "James Brett",
   "license": "MIT",
   "engines": {
@@ -494,7 +493,6 @@ Update `package.json`:
     "typescript": "5.8.3"
   }
 }
-
 ```
 
 ### Step 10: Initial Test File
@@ -512,17 +510,16 @@ test('has title', async ({ page }) => {
 
   // Take a screenshot for visual verification
   const screenshotPath = `reports/${process.env.RUN_ID}/screenshots/homepage-${test.info().project.name}.png`;
-  await page.screenshot({ 
+  await page.screenshot({
     path: screenshotPath,
-    fullPage: true 
+    fullPage: true,
   });
-  
+
   // Attach screenshot to test report
   await test.info().attach('Homepage Screenshot', {
     path: screenshotPath,
-    contentType: 'image/png'
+    contentType: 'image/png',
   });
-
 });
 
 test('get started link', async ({ page }) => {
@@ -534,17 +531,17 @@ test('get started link', async ({ page }) => {
   // Expects page to have a heading with the name of Installation.
   await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
 
-    // Take a screenshot for visual verification
+  // Take a screenshot for visual verification
   const screenshotPath = `reports/${process.env.RUN_ID}/screenshots/get-started-${test.info().project.name}.png`;
-  await page.screenshot({ 
+  await page.screenshot({
     path: screenshotPath,
-    fullPage: true 
+    fullPage: true,
   });
-  
+
   // Attach screenshot to test report
   await test.info().attach('Get Started Screenshot', {
     path: screenshotPath,
-    contentType: 'image/png'
+    contentType: 'image/png',
   });
 });
 ```
@@ -552,6 +549,7 @@ test('get started link', async ({ page }) => {
 ## How to Use Phase 1
 
 ### 1. Initial Setup
+
 ```bash
 # Clone or create the project
 git clone <your-repo-url>
@@ -570,6 +568,7 @@ cp .env.template .env
 ```
 
 ### 2. Run Your First Test
+
 ```bash
 # Run all tests
 pnpm test
@@ -585,6 +584,7 @@ pnpm test:debug
 ```
 
 ### 3. View Reports
+
 ```bash
 # Open HTML report
 pnpm run report:open
@@ -599,21 +599,27 @@ pnpm run report:open
 ## Value Delivered in Phase 1
 
 ### 1. **Type Safety Foundation**
+
 The TypeScript configuration provides compile-time error checking, preventing common runtime errors and making the codebase more maintainable. The strict type checking ensures that potential issues are caught during development rather than during test execution.
 
 ### 2. **Professional Project Structure**
+
 The organized directory structure supports scalability from day one. Teams can easily locate and manage different types of tests, configurations, and utilities without confusion.
 
 ### 3. **Multi-Browser Support**
+
 Out-of-the-box configuration for Chrome, Firefox, Safari, and mobile browsers ensures comprehensive cross-browser testing capability without additional setup.
 
 ### 4. **Development Best Practices**
+
 ESLint and Prettier configurations enforce consistent code style across the team, reducing code review friction and improving code quality.
 
 ### 5. **Environment Flexibility**
+
 The environment configuration system allows the same test suite to run against different environments (local, staging, production) without code changes.
 
 ### 6. **CI/CD Ready**
+
 The configuration includes CI-specific settings, making it easy to integrate with any CI/CD pipeline from the start.
 
 ## Next Phase Preview: Core Architecture

@@ -9,17 +9,16 @@ test('has title', async ({ page }) => {
   // Take a screenshot for visual verification
   const runId = process.env.RUN_ID || 'latest';
   const screenshotPath = `reports/${runId}/screenshots/homepage-${test.info().project.name}.png`;
-  await page.screenshot({ 
+  await page.screenshot({
     path: screenshotPath,
-    fullPage: true 
+    fullPage: true,
   });
-  
+
   // Attach screenshot to test report
   await test.info().attach('Homepage Screenshot', {
     path: screenshotPath,
-    contentType: 'image/png'
+    contentType: 'image/png',
   });
-
 });
 
 test('get started link', async ({ page }) => {
@@ -31,17 +30,17 @@ test('get started link', async ({ page }) => {
   // Expects page to have a heading with the name of Installation.
   await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
 
-    // Take a screenshot for visual verification
+  // Take a screenshot for visual verification
   const runId = process.env.RUN_ID || 'latest';
   const screenshotPath = `reports/${runId}/screenshots/get-started-${test.info().project.name}.png`;
-  await page.screenshot({ 
+  await page.screenshot({
     path: screenshotPath,
-    fullPage: true 
+    fullPage: true,
   });
-  
+
   // Attach screenshot to test report
   await test.info().attach('Get Started Screenshot', {
     path: screenshotPath,
-    contentType: 'image/png'
+    contentType: 'image/png',
   });
 });

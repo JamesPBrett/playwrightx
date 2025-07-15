@@ -1,6 +1,7 @@
 {
   "name": "testwrightx",
   "version": "1.0.0",
+  "type": "module",
   "description": "Playwright testing framework with TypeScript",
   "scripts": {
     "test": "playwright test",
@@ -17,8 +18,8 @@
     "playwright:install": "playwright install --with-deps",
     "report:open": "playwright show-report reports/html",
     "trace:open": "playwright show-trace",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
     "typecheck": "tsc --noEmit",
@@ -39,6 +40,7 @@
   },
   "packageManager": "pnpm@10.13.1",
   "devDependencies": {
+    "@eslint/js": "9.31.0",
     "@playwright/test": "^1.54.0",
     "@types/crypto-js": "4.2.2",
     "@types/jsonwebtoken": "9.0.10",
